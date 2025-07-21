@@ -207,11 +207,24 @@
                 breakEl.innerHTML = `
                     <div class="flex-grow flex items-center gap-2">
                         ${isShort ? '<span class="text-amber-400 font-bold" title="Anlık Mola">A</span>' : ''}
+                        
+                        <!-- Başlangıç Saati Butonları -->
+                        <button data-index="${index}" data-type="start" data-change="-5" class="time-adjust-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded-md">-5</button>
                         <input type="time" value="${br.start}" data-index="${index}" data-type="start" class="break-time-input bg-gray-900 border ${borderColor} rounded-md px-2 py-1 w-full focus:ring-1 focus:ring-cyan-500 focus:outline-none">
+                        <button data-index="${index}" data-type="start" data-change="+5" class="time-adjust-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded-md">+5</button>
+                        
                         <span class="text-gray-500">-</span>
+                        
+                        <!-- Bitiş Saati Butonları -->
+                        <button data-index="${index}" data-type="end" data-change="-5" class="time-adjust-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded-md">-5</button>
                         <input type="time" value="${br.end}" data-index="${index}" data-type="end" class="break-time-input bg-gray-900 border ${borderColor} rounded-md px-2 py-1 w-full focus:ring-1 focus:ring-cyan-500 focus:outline-none">
+                        <button data-index="${index}" data-type="end" data-change="+5" class="time-adjust-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded-md">+5</button>
                     </div>
                     <div class="flex items-center pl-2">
+                        <!-- Sarı Kare Butonu -->
+                        <button data-index="${index}" class="set-end-to-schedule-end-btn bg-amber-500 hover:bg-amber-600 text-white p-1 rounded-md mr-1" title="Bitiş saatini program sonuna ayarla">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                        </button>
                         <button data-index="${index}" title="Molayı sil" class="remove-break-btn text-red-400 hover:text-red-300 p-1 rounded-md">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
@@ -262,9 +275,33 @@
 
         const handleBreakListClicks = (e) => {
             const removeBtn = e.target.closest('.remove-break-btn');
+            const timeAdjustBtn = e.target.closest('.time-adjust-btn');
+            const setEndToScheduleEndBtn = e.target.closest('.set-end-to-schedule-end-btn');
+
             if (removeBtn) {
                 const index = removeBtn.dataset.index;
                 breaks.splice(index, 1);
+                renderBreaks();
+            } else if (timeAdjustBtn) {
+                const index = parseInt(timeAdjustBtn.dataset.index, 10);
+                const type = timeAdjustBtn.dataset.type; // 'start' or 'end'
+                const change = parseInt(timeAdjustBtn.dataset.change, 10); // -5 or +5
+
+                let currentMinutes = timeToMinutes(breaks[index][type]);
+                let newMinutes = currentMinutes + change;
+
+                // Saatlerin 24 saatlik döngüde kalmasını sağla
+                if (newMinutes < 0) {
+                    newMinutes += (24 * 60);
+                } else if (newMinutes >= (24 * 60)) {
+                    newMinutes -= (24 * 60);
+                }
+                
+                breaks[index][type] = minutesToTime(newMinutes);
+                renderBreaks();
+            } else if (setEndToScheduleEndBtn) {
+                const index = parseInt(setEndToScheduleEndBtn.dataset.index, 10);
+                breaks[index].end = scheduleEndInput.value; // Programın bitiş saatini ayarla
                 renderBreaks();
             }
         };
@@ -399,7 +436,7 @@
         // --- Olay Dinleyicilerini Ekle ---
         addBreakBtn.addEventListener('click', handleAddBreak);
         addShortBreakBtn.addEventListener('click', handleAddShortBreak);
-        breaksList.addEventListener('click', handleBreakListClicks);
+        breaksList.addEventListener('click', handleBreakListClicks); // Bu tek event listener tüm butonları ve inputları dinleyecek
         breaksList.addEventListener('change', handleUpdateBreakManually);
         generateBtn.addEventListener('click', handleGenerateSchedule);
         copyBtn.addEventListener('click', handleCopy);
