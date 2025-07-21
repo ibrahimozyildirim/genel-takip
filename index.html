@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Günlük Çalışma Programı Oluşturucu</title>
+    <title>Namaz Vakitli Çalışma Programı Oluşturucu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,15 +12,14 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Çıktı alanına özel stil */
         #output-area {
             font-family: 'Calibri', 'Calibri Light', sans-serif;
             font-size: 12pt;
-            white-space: pre-wrap; /* Metnin satır atlamasını sağlar */
-            word-wrap: break-word; /* Gerekirse uzun kelimeleri böler */
+            white-space: pre-wrap;
+            word-wrap: break-word;
             line-height: 1.6;
         }
-        /* Estetik için özel kaydırma çubuğu */
+        /* Kaydırma çubuğu stilleri artık geçerli değil, ancak diğer yerlerde kullanılabilir */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -34,75 +33,103 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #718096;
         }
+        /* Giriş alanları için daha iyi odak efekti */
+        input[type="text"]:focus,
+        input[type="time"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #06b6d4; /* Cyan-500 */
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.5); /* Cyan-500 ile hafif gölge */
+        }
+        /* Butonlara hafif bir yükselme efekti */
+        button {
+            transition: all 0.2s ease-in-out;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-4xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 grid md:grid-cols-2 gap-8">
+    <div class="w-full max-w-5xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 grid md:grid-cols-2 gap-8">
         
-        <!-- Sol Taraf: Kontroller -->
+        <!-- Sol Taraf: Ayarlar -->
         <div class="flex flex-col space-y-6">
             <div>
                 <h1 class="text-2xl font-bold text-cyan-400">Çalışma Programı Oluşturucu</h1>
-                <p class="text-gray-400 mt-1">Mola saatlerini düzenleyin ve programınızı oluşturun.</p>
+                <p class="text-gray-400 mt-1">Bilgileri ve vakitleri düzenleyip programınızı oluşturun.</p>
             </div>
 
-            <!-- Ad Soyad Girişi -->
+            <!-- Kullanıcı Bilgileri -->
             <div class="bg-gray-700/50 p-4 rounded-lg">
-                <h2 class="text-lg font-semibold mb-3">Ad Soyad</h2>
-                <input type="text" id="student-name" class="bg-gray-800 border border-gray-600 rounded-md px-2 py-1.5 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Adınızı ve soyadınızı girin" value="İbrahim ÖZYILDIRIM">
-            </div>
-            
-            <!-- Sınav Adı Girişi -->
-            <div class="bg-gray-700/50 p-4 rounded-lg">
-                <h2 class="text-lg font-semibold mb-3">Hazırlandığı Sınav</h2>
-                <input type="text" id="exam-name" class="bg-gray-800 border border-gray-600 rounded-md px-2 py-1.5 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Sınav adını girin (örn: YKS, KPSS)" value="HMGS + ADLİ HAKİMLİK">
+                <h2 class="text-lg font-semibold mb-3">Kullanıcı Bilgileri</h2>
+                <div class="space-y-3">
+                    <input type="text" id="student-name" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Adınızı ve soyadınızı girin" value="İbrahim ÖZYILDIRIM">
+                    <input type="text" id="exam-name" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Sınav adını girin (örn: YKS, KPSS)" value="HMGS + ADLİ HAKİMLİK">
+                </div>
             </div>
 
-            <!-- Başlangıç Saati Girişi -->
+            <!-- Program Saatleri -->
             <div class="bg-gray-700/50 p-4 rounded-lg">
-                <h2 class="text-lg font-semibold mb-3">Başlangıç Saati</h2>
-                <input type="time" id="schedule-start" class="bg-gray-800 border border-gray-600 rounded-md px-2 py-1.5 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="06:00">
-            </div>
-            
-            <!-- YENİ: Bitiş Saati Girişi -->
-            <div class="bg-gray-700/50 p-4 rounded-lg">
-                <h2 class="text-lg font-semibold mb-3">Bitiş Saati</h2>
-                <input type="time" id="schedule-end" class="bg-gray-800 border border-gray-600 rounded-md px-2 py-1.5 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="22:10">
+                 <h2 class="text-lg font-semibold mb-3">Program Aralığı</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="schedule-start" class="text-sm text-gray-400">Başlangıç</label>
+                        <input type="time" id="schedule-start" class="mt-1 bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="06:00">
+                    </div>
+                    <div>
+                        <label for="schedule-end" class="text-sm text-gray-400">Bitiş</label>
+                        <input type="time" id="schedule-end" class="mt-1 bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="22:10">
+                    </div>
+                </div>
             </div>
 
-            <!-- Mola Süresi Yönetimi -->
+            <!-- Oluştur Butonu -->
+            <button id="generate-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 mt-auto">
+                Programı Oluştur
+            </button>
+        </div>
+
+        <!-- Sağ Taraf: Molalar ve Çıktı -->
+        <div class="flex flex-col space-y-6">
+            <!-- Planlı Mola Yönetimi -->
             <div class="bg-gray-700/50 p-4 rounded-lg">
-                <h2 class="text-lg font-semibold mb-3">Mola Sürelerini Yönet</h2>
-                <div id="breaks-list" class="space-y-3 mb-4">
+                <h2 class="text-lg font-semibold mb-3">Planlı Molaları Yönet</h2>
+                <!-- max-h-48 ve overflow-y-auto kaldırıldı -->
+                <div id="breaks-list" class="space-y-3 mb-4 pr-2"> 
                     <!-- Mola saatleri dinamik olarak buraya eklenecek -->
                 </div>
                 <div class="flex items-center space-x-2">
-                    <input type="time" id="break-start" class="bg-gray-800 border border-gray-600 rounded-md px-2 py-1.5 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                    <input type="time" id="break-start" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" title="Mola başlangıç saati">
                     <span class="text-gray-400">-</span>
-                    <input type="time" id="break-end" class="bg-gray-800 border border-gray-600 rounded-md px-2 py-1.5 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                    <input type="time" id="break-end" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" title="Mola bitiş saati">
                     <button id="add-break-btn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
                 </div>
             </div>
-
-            <!-- Oluştur Butonu -->
-            <button id="generate-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105">
-                Programı Oluştur
-            </button>
-        </div>
-
-        <!-- Sağ Taraf: Çıktı -->
-        <div class="flex flex-col">
-            <div class="flex justify-between items-center mb-2">
-                <h2 class="text-lg font-semibold">Oluşturulan Program</h2>
-                <button id="copy-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-1.5 px-4 rounded-md transition-colors duration-200 text-sm">
-                    Kopyala
-                </button>
+            
+            <!-- Anlık Mola Ekleme -->
+            <div class="bg-gray-700/50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-3">Anlık Mola Ekle</h2>
+                <div class="flex items-center space-x-2">
+                    <input type="time" id="short-break-time" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Molanın başladığı saat">
+                    <input type="number" id="short-break-duration" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-32 focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="Süre (dk)" title="Mola süresi (dakika)">
+                    <button id="add-short-break-btn" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200">Ekle</button>
+                </div>
             </div>
-            <div class="bg-gray-100 text-gray-900 p-4 rounded-lg h-full min-h-[300px] overflow-y-auto" id="output-container">
-                <pre id="output-area">Programı oluşturmak için soldaki butona tıklayın...</pre>
+
+            <!-- Çıktı Alanı -->
+            <div class="flex flex-col flex-grow">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-lg font-semibold">Oluşturulan Program</h2>
+                    <button id="copy-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-1.5 px-4 rounded-md transition-colors duration-200 text-sm">Kopyala</button>
+                </div>
+                <div class="bg-gray-100 text-gray-900 p-4 rounded-lg h-full min-h-[250px] overflow-y-auto flex-grow" id="output-container">
+                    <pre id="output-area">Programı oluşturmak için soldaki butona tıklayın...</pre>
+                </div>
             </div>
         </div>
     </div>
@@ -112,22 +139,42 @@
         const studentNameInput = document.getElementById('student-name');
         const examNameInput = document.getElementById('exam-name');
         const scheduleStartInput = document.getElementById('schedule-start');
-        const scheduleEndInput = document.getElementById('schedule-end'); // YENİ: Bitiş saati input'u
+        const scheduleEndInput = document.getElementById('schedule-end');
         const breaksList = document.getElementById('breaks-list');
         const addBreakBtn = document.getElementById('add-break-btn');
         const breakStartInput = document.getElementById('break-start');
         const breakEndInput = document.getElementById('break-end');
+        const shortBreakTimeInput = document.getElementById('short-break-time');
+        const shortBreakDurationInput = document.getElementById('short-break-duration');
+        const addShortBreakBtn = document.getElementById('add-short-break-btn');
         const generateBtn = document.getElementById('generate-btn');
         const outputArea = document.getElementById('output-area');
         const copyBtn = document.getElementById('copy-btn');
 
         // --- Başlangıç Durumu ---
         let breaks = [
-            { start: '09:00', end: '09:30' },
-            { start: '12:30', end: '13:30' },
-            { start: '17:30', end: '18:30' },
-            { start: '20:30', end: '21:00' }
+            { start: '09:00', end: '09:30', type: 'planned' },
+            { start: '12:30', end: '13:30', type: 'planned' },
+            { start: '16:30', end: '17:00', type: 'planned' },
+            { start: '20:15', end: '20:45', type: 'planned' }
         ];
+
+        // Namaz isimleri ve varsayılan vakitleri
+        const prayerNames = {
+            fajr: 'Sabah',
+            dhuhr: 'Öğle',
+            asr: 'İkindi',
+            maghrib: 'Akşam',
+            isha: 'Yatsı'
+        };
+        
+        const defaultPrayerTimes = {
+            fajr: '05:30',
+            dhuhr: '13:00',
+            asr: '16:55',
+            maghrib: '20:20',
+            isha: '21:59'
+        };
 
         // --- Yardımcı Fonksiyonlar ---
         const timeToMinutes = (timeStr) => {
@@ -142,9 +189,6 @@
             return `${hours}:${minutes}`;
         };
 
-        /**
-         * Mevcut mola listesini arayüze işler.
-         */
         const renderBreaks = () => {
             breaksList.innerHTML = '';
             if (breaks.length === 0) {
@@ -157,31 +201,17 @@
             breaks.forEach((br, index) => {
                 const breakEl = document.createElement('div');
                 breakEl.className = 'break-item flex items-center justify-between bg-gray-800 p-2 rounded-md text-sm';
-                
-                const btnClasses = "adjust-time-btn bg-gray-600 hover:bg-gray-500 text-white font-mono font-bold w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-md transition-colors duration-200 text-sm";
-                
-                breakEl.innerHTML = `
-                    <div class="flex-grow flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-1">
-                        <!-- Başlangıç Saati Bloğu -->
-                        <div class="flex items-center gap-1 w-full sm:w-auto">
-                            <button data-index="${index}" data-type="start" data-amount="-10" class="${btnClasses}">-10</button>
-                            <input type="time" value="${br.start}" data-index="${index}" data-type="start" class="break-time-input bg-gray-900 border border-gray-700 rounded-md px-1 py-0.5 w-full focus:ring-1 focus:ring-cyan-500 focus:outline-none">
-                            <button data-index="${index}" data-type="start" data-amount="10" class="${btnClasses}">+10</button>
-                        </div>
-                        
-                        <span class="text-gray-500 hidden sm:block">-</span>
+                const isShort = br.type === 'short';
+                const borderColor = isShort ? 'border-amber-500' : 'border-gray-700';
 
-                        <!-- Bitiş Saati Bloğu -->
-                        <div class="flex items-center gap-1 w-full sm:w-auto">
-                            <button data-index="${index}" data-type="end" data-amount="-10" class="${btnClasses}">-10</button>
-                            <input type="time" value="${br.end}" data-index="${index}" data-type="end" class="break-time-input bg-gray-900 border border-gray-700 rounded-md px-1 py-0.5 w-full focus:ring-1 focus:ring-cyan-500 focus:outline-none">
-                            <button data-index="${index}" data-type="end" data-amount="10" class="${btnClasses}">+10</button>
-                        </div>
+                breakEl.innerHTML = `
+                    <div class="flex-grow flex items-center gap-2">
+                        ${isShort ? '<span class="text-amber-400 font-bold" title="Anlık Mola">A</span>' : ''}
+                        <input type="time" value="${br.start}" data-index="${index}" data-type="start" class="break-time-input bg-gray-900 border ${borderColor} rounded-md px-2 py-1 w-full focus:ring-1 focus:ring-cyan-500 focus:outline-none">
+                        <span class="text-gray-500">-</span>
+                        <input type="time" value="${br.end}" data-index="${index}" data-type="end" class="break-time-input bg-gray-900 border ${borderColor} rounded-md px-2 py-1 w-full focus:ring-1 focus:ring-cyan-500 focus:outline-none">
                     </div>
                     <div class="flex items-center pl-2">
-                        <button data-index="${index}" title="Dersi bu molanın başlangıcında bitir" class="end-study-btn text-yellow-400 hover:text-yellow-300 p-1 rounded-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>
-                        </button>
                         <button data-index="${index}" title="Molayı sil" class="remove-break-btn text-red-400 hover:text-red-300 p-1 rounded-md">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
@@ -196,7 +226,7 @@
             const start = breakStartInput.value;
             const end = breakEndInput.value;
             if (start && end && timeToMinutes(start) < timeToMinutes(end)) {
-                breaks.push({ start, end });
+                breaks.push({ start, end, type: 'planned' });
                 breakStartInput.value = '';
                 breakEndInput.value = '';
                 renderBreaks();
@@ -205,40 +235,32 @@
             }
         };
         
+        const handleAddShortBreak = () => {
+            const startTimeStr = shortBreakTimeInput.value;
+            const durationMins = parseInt(shortBreakDurationInput.value, 10);
+
+            if (!startTimeStr || isNaN(durationMins) || durationMins <= 0) {
+                showCustomAlert('Lütfen geçerli bir mola başlangıç saati ve pozitif bir süre (dakika) girin.');
+                return;
+            }
+
+            const startMins = timeToMinutes(startTimeStr);
+            const endMins = startMins + durationMins;
+
+            const newBreak = { 
+                start: minutesToTime(startMins % (24 * 60)),
+                end: minutesToTime(endMins % (24 * 60)),
+                type: 'short'
+            };
+            
+            breaks.push(newBreak);
+            renderBreaks();
+
+            shortBreakTimeInput.value = '';
+            shortBreakDurationInput.value = '';
+        };
+
         const handleBreakListClicks = (e) => {
-            const adjustBtn = e.target.closest('.adjust-time-btn');
-            if (adjustBtn) {
-                const index = parseInt(adjustBtn.dataset.index, 10);
-                const type = adjustBtn.dataset.type;
-                const amount = parseInt(adjustBtn.dataset.amount, 10);
-                const breakToUpdate = { ...breaks[index] };
-                const timeToChange = (type === 'start') ? breakToUpdate.start : breakToUpdate.end;
-                let newTimeInMinutes = timeToMinutes(timeToChange) + amount;
-                if (newTimeInMinutes < 0) newTimeInMinutes += 24 * 60;
-                newTimeInMinutes %= (24 * 60);
-                const newTimeStr = minutesToTime(newTimeInMinutes);
-                if (type === 'start') {
-                    breakToUpdate.start = newTimeStr;
-                } else {
-                    breakToUpdate.end = newTimeStr;
-                }
-                if (timeToMinutes(breakToUpdate.start) >= timeToMinutes(breakToUpdate.end)) {
-                    showCustomAlert('Hata: Başlangıç saati, bitiş saatinden önce olmalıdır.');
-                    return;
-                }
-                breaks[index] = breakToUpdate;
-                renderBreaks();
-                return;
-            }
-
-            const endStudyBtn = e.target.closest('.end-study-btn');
-            if (endStudyBtn) {
-                const index = parseInt(endStudyBtn.dataset.index, 10);
-                const endTime = breaks[index].start;
-                handleGenerateSchedule(endTime);
-                return;
-            }
-
             const removeBtn = e.target.closest('.remove-break-btn');
             if (removeBtn) {
                 const index = removeBtn.dataset.index;
@@ -249,35 +271,30 @@
 
         const handleUpdateBreakManually = (e) => {
             if (e.target.classList.contains('break-time-input')) {
-                const breakEl = e.target.closest('.break-item');
-                const index = parseInt(breakEl.querySelector('.remove-break-btn').dataset.index, 10);
-                const startInput = breakEl.querySelector('input[data-type="start"]');
-                const endInput = breakEl.querySelector('input[data-type="end"]');
-                const newStart = startInput.value;
-                const newEnd = endInput.value;
-                if (timeToMinutes(newStart) >= timeToMinutes(newEnd)) {
-                    showCustomAlert('Hata: Bitiş saati, başlangıç saatinden sonra olmalıdır. Değişiklik geri alınıyor.');
-                    renderBreaks();
-                    return;
+                const index = parseInt(e.target.dataset.index, 10);
+                const type = e.target.dataset.type;
+                breaks[index][type] = e.target.value;
+
+                if (timeToMinutes(breaks[index].start) >= timeToMinutes(breaks[index].end)) {
+                     showCustomAlert('Hata: Bitiş saati, başlangıç saatinden sonra olmalıdır.');
+                     renderBreaks(); // Hatalı değişikliği geri almak için yeniden render et
                 }
-                breaks[index] = { start: newStart, end: newEnd };
-                renderBreaks();
             }
         };
-
-        const handleGenerateSchedule = (customEndTime = null) => {
+        
+        const handleGenerateSchedule = () => {
             const studentName = studentNameInput.value.trim() || 'İsim Girilmedi';
             const examName = examNameInput.value.trim() || 'Sınav Girilmedi';
             
             const today = new Date();
-            const day = today.getDate().toString().padStart(2, '0');
-            const month = (today.getMonth() + 1).toString().padStart(2, '0');
-            const year = today.getFullYear();
-            const formattedDate = `${day}.${month}.${year}`;
+            const formattedDate = today.toLocaleDateString('tr-TR');
 
             const scheduleStart = scheduleStartInput.value;
-            // GÜNCELLENDİ: Bitiş saatini input'tan al
-            const scheduleEnd = customEndTime || scheduleEndInput.value;
+            const scheduleEnd = scheduleEndInput.value;
+            
+            // Namaz vakitlerini doğrudan defaultPrayerTimes objesinden al
+            const prayerTimesInMinutes = Object.values(defaultPrayerTimes).map(timeToMinutes);
+
             let totalStudyMinutes = 0;
             let output = `Tarih: ${formattedDate}\n`;
             output += `Ad soyad: ${studentName}\nHazırlandığı sınav: ${examName}\n\n`;
@@ -289,7 +306,7 @@
             });
             
             const sortedTimePoints = [...timePoints]
-                .filter(t => timeToMinutes(t) >= timeToMinutes(scheduleStart) && timeToMinutes(t) <= timeToMinutes(scheduleEnd))
+                .filter(t => t && timeToMinutes(t) >= timeToMinutes(scheduleStart) && timeToMinutes(t) <= timeToMinutes(scheduleEnd))
                 .map(timeToMinutes)
                 .sort((a, b) => a - b)
                 .map(minutesToTime);
@@ -301,16 +318,29 @@
                 const slotEndMins = timeToMinutes(slotEnd);
                 
                 const midPoint = slotStartMins + (slotEndMins - slotStartMins) / 2;
-                const isBreak = breaks.some(br => {
+                
+                const currentBreak = breaks.find(br => {
                     const breakStartMins = timeToMinutes(br.start);
                     const breakEndMins = timeToMinutes(br.end);
                     return midPoint >= breakStartMins && midPoint < breakEndMins;
                 });
+
+                let activity = 'Ders';
+                if(currentBreak) {
+                    if(currentBreak.type === 'short') {
+                        activity = 'Anlık Mola';
+                    } else {
+                        const breakStartMins = timeToMinutes(currentBreak.start);
+                        const breakEndMins = timeToMinutes(currentBreak.end);
+                        const isPrayerTimeInBreak = prayerTimesInMinutes.some(
+                            prayerMin => prayerMin >= breakStartMins && prayerMin < breakEndMins
+                        );
+                        activity = isPrayerTimeInBreak ? 'Namaz (kalan kısım mola)' : 'Mola';
+                    }
+                }
                 
                 const duration = slotEndMins - slotStartMins;
-                const activity = isBreak ? 'Namaz (kalan kısım mola)' : 'Ders';
-                
-                if (!isBreak && duration > 0) {
+                if (activity === 'Ders' && duration > 0) {
                     totalStudyMinutes += duration;
                 }
                 
@@ -330,30 +360,37 @@
 
         const handleCopy = () => {
             const textToCopy = outputArea.textContent;
+            // Geçici bir textarea oluşturup metni içine kopyalıyoruz
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = textToCopy;
             document.body.appendChild(tempTextArea);
             tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
-            copyBtn.textContent = 'Kopyalandı!';
-            setTimeout(() => {
-                copyBtn.textContent = 'Kopyala';
-            }, 2000);
+            try {
+                document.execCommand('copy'); // Kopyalama işlemini gerçekleştir
+                copyBtn.textContent = 'Kopyalandı!';
+            } catch (err) {
+                console.error('Metin kopyalanamadı:', err);
+                showCustomAlert('Metin kopyalanırken bir hata oluştu.');
+            } finally {
+                document.body.removeChild(tempTextArea); // Geçici textarea'yı kaldır
+                setTimeout(() => { copyBtn.textContent = 'Kopyala'; }, 2000);
+            }
         };
 
-        // Özel uyarı fonksiyonu
         const showCustomAlert = (message) => {
+            if (document.querySelector('.custom-alert')) return;
             const alertBox = document.createElement('div');
-            alertBox.className = 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50';
+            alertBox.className = 'custom-alert fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4';
             alertBox.innerHTML = `
-                <div class="bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full text-center transform transition-all scale-95 opacity-0 animate-fade-in-up">
                     <p class="text-white text-lg mb-4">${message}</p>
-                    <button id="custom-alert-ok-btn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Tamam</button>
+                    <button id="custom-alert-ok-btn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-6 rounded-md transition-colors duration-200">Tamam</button>
                 </div>
             `;
             document.body.appendChild(alertBox);
-
+            setTimeout(() => {
+                alertBox.querySelector('div').classList.remove('scale-95', 'opacity-0');
+            }, 10);
             document.getElementById('custom-alert-ok-btn').addEventListener('click', () => {
                 document.body.removeChild(alertBox);
             });
@@ -361,13 +398,21 @@
 
         // --- Olay Dinleyicilerini Ekle ---
         addBreakBtn.addEventListener('click', handleAddBreak);
+        addShortBreakBtn.addEventListener('click', handleAddShortBreak);
         breaksList.addEventListener('click', handleBreakListClicks);
         breaksList.addEventListener('change', handleUpdateBreakManually);
-        generateBtn.addEventListener('click', () => handleGenerateSchedule(null));
+        generateBtn.addEventListener('click', handleGenerateSchedule);
         copyBtn.addEventListener('click', handleCopy);
 
         // --- Başlangıçta İşle ---
         renderBreaks();
     </script>
+    <style>
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.3s ease-out forwards; }
+    </style>
 </body>
 </html>
