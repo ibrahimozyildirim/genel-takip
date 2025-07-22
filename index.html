@@ -64,7 +64,7 @@
     <!-- Ana kapsayıcı: küçük ekranlarda dikey yığılır, orta ekranlarda 2 sütunlu ızgaraya dönüşür -->
     <div class="w-full max-w-5xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 flex flex-col md:grid md:grid-cols-2 gap-8">
         
-        <!-- Sol Taraf: Ayarlar -->
+        <!-- Sol Taraf: Ayarlar (Kullanıcı Bilgileri ve Program Aralığı) -->
         <div class="flex flex-col space-y-6">
             <div>
                 <h1 class="text-2xl font-bold text-cyan-400">Çalışma Programı Oluşturucu</h1>
@@ -94,11 +94,9 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Sol tarafta artık "Programı Oluştur" butonu yok -->
         </div>
 
-        <!-- Sağ Taraf: Molalar ve Çıktı -->
+        <!-- Sağ Taraf: Molalar, Toplantılar ve Çıktı -->
         <div class="flex flex-col space-y-6">
             <!-- Planlı Mola Yönetimi Bölümü -->
             <div class="bg-gray-700/50 p-4 rounded-lg">
@@ -108,7 +106,7 @@
                 </div>
                 <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                     <input type="time" id="break-start" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" title="Mola başlangıç saati">
-                    <span class="text-gray-400 hidden sm:block">-</span> <!-- Küçük ekranlarda gizle -->
+                    <span class="text-gray-400 hidden sm:block">-</span>
                     <input type="time" id="break-end" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" title="Mola bitiş saati">
                     <button id="add-break-btn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 w-full sm:w-auto">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -126,7 +124,17 @@
                 </div>
             </div>
 
-            <!-- Program Oluştur Butonu (Yeni Konum) -->
+            <!-- Toplantı Ekleme Bölümü -->
+            <div class="bg-gray-700/50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-3">Toplantı Ekle</h2>
+                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                    <input type="time" id="meeting-start-time" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:outline-none" title="Toplantının başladığı saat">
+                    <input type="number" id="meeting-duration" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full sm:w-32 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Süre (dk)" title="Toplantı süresi (dakika)">
+                    <button id="add-meeting-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 w-full sm:w-auto">Ekle</button>
+                </div>
+            </div>
+
+            <!-- Program Oluştur Butonu -->
             <button id="generate-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 my-6">
                 Programı Oluştur
             </button>
@@ -157,6 +165,9 @@
         const shortBreakTimeInput = document.getElementById('short-break-time');
         const shortBreakDurationInput = document.getElementById('short-break-duration');
         const addShortBreakBtn = document.getElementById('add-short-break-btn');
+        const meetingStartTimeInput = document.getElementById('meeting-start-time'); 
+        const meetingDurationInput = document.getElementById('meeting-duration');     
+        const addMeetingBtn = document.getElementById('add-meeting-btn');             
         const generateBtn = document.getElementById('generate-btn');
         const outputArea = document.getElementById('output-area');
         const copyBtn = document.getElementById('copy-btn');
@@ -169,7 +180,6 @@
         };
 
         const minutesToTime = (totalMinutes) => {
-            // Ensure totalMinutes is not negative
             totalMinutes = Math.max(0, totalMinutes);
             const hours = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
             const minutes = (totalMinutes % 60).toString().padStart(2, '0');
@@ -187,10 +197,10 @@
         
         const defaultPrayerTimes = {
             fajr: '05:30', 
-            dhuhr: '13:10', // Öğlen sünnete duruş
-            asr: '17:40',  // İkindi sünnete duruş
-            maghrib: '20:30', // Akşam farzına duruş
-            isha: '22:10'   // Yatsı sünnete duruş
+            dhuhr: '13:10', 
+            asr: '17:40',  
+            maghrib: '20:30', 
+            isha: '22:10'   
         };
 
         // --- Başlangıç Durumu ---
@@ -215,6 +225,7 @@
                 breakEl.className = 'break-item flex items-center justify-between bg-gray-800 p-2 rounded-md text-sm';
                 const isShort = br.type === 'short';
                 const isPrayerMola = br.type === 'prayer_mola';
+                const isMeeting = br.type === 'meeting'; 
 
                 // Molanın namaz vakti içerip içermediğini kontrol et
                 const breakStartMins = timeToMinutes(br.start);
@@ -224,13 +235,16 @@
                     return prayerMins >= breakStartMins && prayerMins < breakEndMins;
                 });
 
-                // Sınır rengini ve "N" göstergesini belirle
+                // Sınır rengini ve göstergeyi belirle
                 let borderColor = 'border-gray-700';
                 let indicator = '';
                 if (isShort) {
                     borderColor = 'border-amber-500';
                     indicator = '<span class="text-amber-400 font-bold" title="Anlık Mola">A</span>';
-                } else if (isPrayerMola || containsPrayerTime) { // Hem özel namaz molaları hem de namaz içeren planlı molalar için
+                } else if (isMeeting) { 
+                    borderColor = 'border-blue-500';
+                    indicator = '<span class="text-blue-400 font-bold" title="Toplantı">T</span>';
+                } else if (isPrayerMola || containsPrayerTime) { 
                     borderColor = 'border-purple-500';
                     indicator = '<span class="text-purple-400 font-bold" title="Namaz Vakti İçeriyor">N</span>';
                 }
@@ -291,6 +305,33 @@
             shortBreakDurationInput.value = '';
         };
 
+        // Toplantı Ekleme Fonksiyonu
+        const handleAddMeeting = () => {
+            const startTimeStr = meetingStartTimeInput.value;
+            const durationMins = parseInt(meetingDurationInput.value, 10);
+
+            if (!startTimeStr || isNaN(durationMins) || durationMins <= 0) {
+                showCustomAlert('Lütfen geçerli bir toplantı başlangıç saati ve pozitif bir süre (dakika) girin.');
+                return;
+            }
+
+            const startMins = timeToMinutes(startTimeStr);
+            const endMins = startMins + durationMins;
+
+            const newMeeting = { 
+                start: minutesToTime(startMins), 
+                end: minutesToTime(endMins),     
+                type: 'meeting' 
+            };
+            
+            breaks.push(newMeeting); 
+            renderBreaks();
+
+            meetingStartTimeInput.value = '';
+            meetingDurationInput.value = '';
+        };
+
+
         const handleBreakListClicks = (e) => {
             const removeBtn = e.target.closest('.remove-break-btn');
             if (removeBtn) {
@@ -308,7 +349,7 @@
 
                 if (timeToMinutes(breaks[index].start) >= timeToMinutes(breaks[index].end)) {
                      showCustomAlert('Hata: Bitiş saati, başlangıç saatinden sonra olmalıdır.');
-                     renderBreaks(); // Hatalı değişikliği geri almak için yeniden render et
+                     renderBreaks(); 
                 }
             }
         };
@@ -323,10 +364,8 @@
             const scheduleStart = scheduleStartInput.value;
             const scheduleEnd = scheduleEndInput.value;
             
-            // Namaz vakitlerini doğrudan defaultPrayerTimes objesinden al
             const prayerTimesInMinutes = Object.values(defaultPrayerTimes).map(timeToMinutes);
 
-            let totalStudyMinutes = 0;
             let output = `Tarih: ${formattedDate}\n`;
             output += `Ad soyad: ${studentName}\nHazırlandığı sınav: ${examName}\n\n`;
             
@@ -338,18 +377,16 @@
             
             const sortedTimePoints = [...timePoints]
                 .filter(t => t >= timeToMinutes(scheduleStart) && t <= timeToMinutes(scheduleEnd))
-                .sort((a, b) => a - b)
-                .map(minutesToTime);
-            
+                .sort((a, b) => a - b);
+
+            let processedSlots = []; // Her bir zaman dilimini ve aktivitesini tutacak dizi
+
             for (let i = 0; i < sortedTimePoints.length - 1; i++) {
-                const slotStart = sortedTimePoints[i];
-                const slotEnd = sortedTimePoints[i + 1];
-                const slotStartMins = timeToMinutes(slotStart);
-                const slotEndMins = timeToMinutes(slotEnd);
-                
-                // Slotun orta noktasını kullanarak hangi mola veya aktiviteye denk geldiğini bul
+                const slotStartMins = sortedTimePoints[i];
+                const slotEndMins = sortedTimePoints[i + 1];
+
                 const midPoint = slotStartMins + (slotEndMins - slotStartMins) / 2;
-                
+
                 const currentBreak = breaks.find(br => {
                     const breakStartMins = timeToMinutes(br.start);
                     const breakEndMins = timeToMinutes(br.end);
@@ -362,10 +399,12 @@
                         activity = 'Anlık Mola';
                     } else if (currentBreak.type === 'prayer_mola') { 
                         activity = 'Namaz (kalan kısım mola)';
-                    } else { // type === 'planned'
+                    } else if (currentBreak.type === 'meeting') { 
+                        activity = 'Toplantı';
+                    }
+                    else { 
                         const breakStartMins = timeToMinutes(currentBreak.start);
                         const breakEndMins = timeToMinutes(currentBreak.end);
-                        // Planlı mola içinde namaz vakti olup olmadığını kontrol et
                         const isPrayerTimeInBreak = prayerTimesInMinutes.some(
                             prayerMin => prayerMin >= breakStartMins && prayerMin < breakEndMins
                         );
@@ -374,71 +413,88 @@
                 }
                 
                 const duration = slotEndMins - slotStartMins;
-                if (activity === 'Ders' && duration > 0) {
-                    totalStudyMinutes += duration;
-                }
-                
                 if (duration > 0) {
-                    output += `${slotStart} - ${slotEnd} arası ${activity}\n`;
+                    processedSlots.push({
+                        start: slotStartMins,
+                        end: slotEndMins,
+                        activity: activity,
+                        duration: duration
+                    });
                 }
             }
-            
-            const studyHours = Math.floor(totalStudyMinutes / 60);
-            const studyMinutes = totalStudyMinutes % 60;
+
+            // Ardışık aynı aktiviteye sahip (özellikle toplantılar) zaman dilimlerini birleştir
+            let finalOutputBlocks = [];
+            let currentBlock = null;
+
+            for (let i = 0; i < processedSlots.length; i++) {
+                const slot = processedSlots[i];
+
+                if (currentBlock === null) {
+                    currentBlock = { ...slot };
+                } else {
+                    // Eğer mevcut slot, önceki blokla aynı aktiviteye sahipse ve bitiş zamanı birleşiyorsa
+                    if (slot.activity === currentBlock.activity && slot.start === currentBlock.end) {
+                        currentBlock.end = slot.end;
+                        currentBlock.duration += slot.duration;
+                    } else {
+                        // Birleştirilemiyorsa, mevcut bloğu ekle ve yeni bir blok başlat
+                        finalOutputBlocks.push(currentBlock);
+                        currentBlock = { ...slot };
+                    }
+                }
+            }
+            // Döngü bittikten sonra son bloğu ekle
+            if (currentBlock !== null) {
+                finalOutputBlocks.push(currentBlock);
+            }
+
+            let totalStudyMinutes = 0;
+            finalOutputBlocks.forEach(block => {
+                output += `${minutesToTime(block.start)} - ${minutesToTime(block.end)} arası ${block.activity}\n`;
+                if (block.activity === 'Ders') {
+                    totalStudyMinutes += block.duration;
+                }
+            });
             
             output += `\n--------------------------------------\n`;
-            output += `Toplam Süre: ${studyHours} saat ${studyMinutes} dakika`;
+            output += `Toplam Süre: ${Math.floor(totalStudyMinutes / 60)} saat ${totalStudyMinutes % 60} dakika`;
             
             outputArea.textContent = output;
         };
 
-        const handleCopy = async () => {
+        const handleCopy = () => {
             const textToCopy = outputArea.textContent;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            tempTextArea.style.position = 'absolute';
+            tempTextArea.style.left = '-9999px';
+            tempTextArea.style.top = '0';
+            document.body.appendChild(tempTextArea);
+            tempTextArea.focus();
+            tempTextArea.select();
+
             let copiedSuccessfully = false;
-
             try {
-                // Modern Clipboard API'yi dene
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(textToCopy);
-                    copiedSuccessfully = true;
-                }
+                copiedSuccessfully = document.execCommand('copy');
             } catch (err) {
-                // Clipboard API engellenirse veya başarısız olursa, eski yönteme geri dön
-                console.warn('navigator.clipboard.writeText() başarısız oldu, document.execCommand\'e geri dönülüyor:', err);
-            }
-
-            // Eğer kopyalama henüz başarılı olmadıysa (API mevcut değilse veya başarısız olduysa), document.execCommand'i dene
-            if (!copiedSuccessfully) {
-                const tempTextArea = document.createElement('textarea');
-                tempTextArea.value = textToCopy;
-                tempTextArea.style.position = 'absolute';
-                tempTextArea.style.left = '-9999px';
-                tempTextArea.style.top = '0';
-                document.body.appendChild(tempTextArea);
-                tempTextArea.focus();
-                tempTextArea.select();
-
-                try {
-                    copiedSuccessfully = document.execCommand('copy');
-                } catch (err) {
-                    console.error('document.execCommand("copy") başarısız oldu:', err);
-                    showCustomAlert('Metin kopyalanırken bir hata oluştu (eski yöntem): ' + err.message);
-                } finally {
-                    document.body.removeChild(tempTextArea);
-                }
+                console.error('Metin kopyalanamadı (document.execCommand):', err);
+                showCustomAlert('Metin kopyalanırken bir hata oluştu: ' + err.message + '. Lütfen manuel olarak kopyalamayı deneyin.');
+            } finally {
+                document.body.removeChild(tempTextArea);
             }
 
             if (copiedSuccessfully) {
                 copyBtn.textContent = 'Kopyalandı!';
             } else {
-                showCustomAlert('Metin panoya kopyalanamadı. Lütfen manuel olarak kopyalamayı deneyin.');
+                showCustomAlert('Metin panoya kopyalanamadı. Tarayıcınız bu işlemi engelliyor olabilir. Lütfen manuel olarak kopyalamayı deneyin.');
             }
             
             setTimeout(() => { copyBtn.textContent = 'Kopyala'; }, 2000);
         };
 
         const showCustomAlert = (message) => {
-            if (document.querySelector('.custom-alert')) return; // Zaten bir uyarı açıksa yenisini oluşturma
+            if (document.querySelector('.custom-alert')) return; 
             const alertBox = document.createElement('div');
             alertBox.className = 'custom-alert fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4';
             alertBox.innerHTML = `
@@ -448,7 +504,6 @@
                 </div>
             `;
             document.body.appendChild(alertBox);
-            // Küçük bir gecikme ile animasyonu başlat
             setTimeout(() => {
                 alertBox.querySelector('div').classList.remove('scale-95', 'opacity-0');
             }, 10);
@@ -460,6 +515,7 @@
         // --- Olay Dinleyicilerini Ekle ---
         addBreakBtn.addEventListener('click', handleAddBreak);
         addShortBreakBtn.addEventListener('click', handleAddShortBreak);
+        addMeetingBtn.addEventListener('click', handleAddMeeting); 
         breaksList.addEventListener('click', handleBreakListClicks);
         breaksList.addEventListener('change', handleUpdateBreakManually);
         generateBtn.addEventListener('click', handleGenerateSchedule);
