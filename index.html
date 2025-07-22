@@ -9,29 +9,31 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* Ana font ailesi */
         body {
             font-family: 'Inter', sans-serif;
         }
+        /* Çıktı alanı için özel font ve stil */
         #output-area {
             font-family: 'Calibri', 'Calibri Light', sans-serif;
             font-size: 12pt;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.6;
+            white-space: pre-wrap; /* Satır sonlarını koru */
+            word-wrap: break-word; /* Uzun kelimeleri böl */
+            line-height: 1.6; /* Satır yüksekliği */
         }
-        /* Kaydırma çubuğu stilleri artık geçerli değil, ancak diğer yerlerde kullanılabilir */
+        /* Kaydırma çubuğu stilleri (webkit tabanlı tarayıcılar için) */
         ::-webkit-scrollbar {
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #2d3748;
+            background: #2d3748; /* Koyu gri arka plan */
         }
         ::-webkit-scrollbar-thumb {
-            background: #4a5568;
+            background: #4a5568; /* Orta gri başparmak */
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+            background: #718096; /* Açık gri hover efekti */
         }
         /* Giriş alanları için daha iyi odak efekti */
         input[type="text"]:focus,
@@ -49,11 +51,18 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
+        /* Özel uyarı kutusu animasyonu */
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.3s ease-out forwards; }
     </style>
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-5xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 grid md:grid-cols-2 gap-8">
+    <!-- Ana kapsayıcı: küçük ekranlarda dikey yığılır, orta ekranlarda 2 sütunlu ızgaraya dönüşür -->
+    <div class="w-full max-w-5xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 flex flex-col md:grid md:grid-cols-2 gap-8">
         
         <!-- Sol Taraf: Ayarlar -->
         <div class="flex flex-col space-y-6">
@@ -62,7 +71,7 @@
                 <p class="text-gray-400 mt-1">Bilgileri ve vakitleri düzenleyip programınızı oluşturun.</p>
             </div>
 
-            <!-- Kullanıcı Bilgileri -->
+            <!-- Kullanıcı Bilgileri Bölümü -->
             <div class="bg-gray-700/50 p-4 rounded-lg">
                 <h2 class="text-lg font-semibold mb-3">Kullanıcı Bilgileri</h2>
                 <div class="space-y-3">
@@ -71,13 +80,13 @@
                 </div>
             </div>
 
-            <!-- Program Saatleri -->
+            <!-- Program Saatleri Bölümü -->
             <div class="bg-gray-700/50 p-4 rounded-lg">
                  <h2 class="text-lg font-semibold mb-3">Program Aralığı</h2>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="schedule-start" class="text-sm text-gray-400">Başlangıç</label>
-                        <input type="time" id="schedule-start" class="mt-1 bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="06:00">
+                        <input type="time" id="schedule-start" class="mt-1 bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="09:30"> <!-- Burası güncellendi -->
                     </div>
                     <div>
                         <label for="schedule-end" class="text-sm text-gray-400">Bitiş</label>
@@ -86,40 +95,41 @@
                 </div>
             </div>
 
-            <!-- Oluştur Butonu -->
-            <button id="generate-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 mt-auto">
-                Programı Oluştur
-            </button>
+            <!-- Sol tarafta artık "Programı Oluştur" butonu yok -->
         </div>
 
         <!-- Sağ Taraf: Molalar ve Çıktı -->
         <div class="flex flex-col space-y-6">
-            <!-- Planlı Mola Yönetimi -->
+            <!-- Planlı Mola Yönetimi Bölümü -->
             <div class="bg-gray-700/50 p-4 rounded-lg">
                 <h2 class="text-lg font-semibold mb-3">Planlı Molaları Yönet</h2>
-                <!-- max-h-48 ve overflow-y-auto kaldırıldı -->
                 <div id="breaks-list" class="space-y-3 mb-4 pr-2"> 
                     <!-- Mola saatleri dinamik olarak buraya eklenecek -->
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                     <input type="time" id="break-start" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" title="Mola başlangıç saati">
-                    <span class="text-gray-400">-</span>
+                    <span class="text-gray-400 hidden sm:block">-</span> <!-- Küçük ekranlarda gizle -->
                     <input type="time" id="break-end" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" title="Mola bitiş saati">
-                    <button id="add-break-btn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200">
+                    <button id="add-break-btn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 w-full sm:w-auto">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
                 </div>
             </div>
             
-            <!-- Anlık Mola Ekleme -->
+            <!-- Anlık Mola Ekleme Bölümü -->
             <div class="bg-gray-700/50 p-4 rounded-lg">
                 <h2 class="text-lg font-semibold mb-3">Anlık Mola Ekle</h2>
-                <div class="flex items-center space-x-2">
+                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                     <input type="time" id="short-break-time" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Molanın başladığı saat">
-                    <input type="number" id="short-break-duration" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-32 focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="Süre (dk)" title="Mola süresi (dakika)">
-                    <button id="add-short-break-btn" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200">Ekle</button>
+                    <input type="number" id="short-break-duration" class="bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full sm:w-32 focus:ring-2 focus:ring-amber-500 focus:outline-none" placeholder="Süre (dk)" title="Mola süresi (dakika)">
+                    <button id="add-short-break-btn" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 w-full sm:w-auto">Ekle</button>
                 </div>
             </div>
+
+            <!-- Program Oluştur Butonu (Yeni Konum) -->
+            <button id="generate-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 my-6">
+                Programı Oluştur
+            </button>
 
             <!-- Çıktı Alanı -->
             <div class="flex flex-col flex-grow">
@@ -151,13 +161,20 @@
         const outputArea = document.getElementById('output-area');
         const copyBtn = document.getElementById('copy-btn');
 
-        // --- Başlangıç Durumu ---
-        let breaks = [
-            { start: '09:00', end: '09:30', type: 'planned' },
-            { start: '12:30', end: '13:30', type: 'planned' },
-            { start: '16:30', end: '17:00', type: 'planned' },
-            { start: '20:15', end: '20:45', type: 'planned' }
-        ];
+        // --- Yardımcı Fonksiyonlar ---
+        const timeToMinutes = (timeStr) => {
+            if (!timeStr) return 0;
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        };
+
+        const minutesToTime = (totalMinutes) => {
+            // Ensure totalMinutes is not negative
+            totalMinutes = Math.max(0, totalMinutes);
+            const hours = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
+            const minutes = (totalMinutes % 60).toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        };
 
         // Namaz isimleri ve varsayılan vakitleri
         const prayerNames = {
@@ -169,25 +186,20 @@
         };
         
         const defaultPrayerTimes = {
-            fajr: '05:30',
-            dhuhr: '13:00',
-            asr: '16:55',
-            maghrib: '20:20',
-            isha: '21:59'
+            fajr: '05:30', 
+            dhuhr: '13:10', // Öğlen sünnete duruş
+            asr: '17:40',  // İkindi sünnete duruş
+            maghrib: '20:30', // Akşam farzına duruş
+            isha: '22:10'   // Yatsı sünnete duruş
         };
 
-        // --- Yardımcı Fonksiyonlar ---
-        const timeToMinutes = (timeStr) => {
-            if (!timeStr) return 0;
-            const [hours, minutes] = timeStr.split(':').map(Number);
-            return hours * 60 + minutes;
-        };
-
-        const minutesToTime = (totalMinutes) => {
-            const hours = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
-            const minutes = (totalMinutes % 60).toString().padStart(2, '0');
-            return `${hours}:${minutes}`;
-        };
+        // --- Başlangıç Durumu ---
+        let breaks = [
+            { start: '09:00', end: '09:30', type: 'planned' },
+            { start: '12:25', end: '13:30', type: 'planned' }, 
+            { start: '20:10', end: '20:45', type: 'planned' }, 
+            { start: '17:35', end: '18:30', type: 'prayer_mola' } 
+        ];
 
         const renderBreaks = () => {
             breaksList.innerHTML = '';
@@ -202,29 +214,35 @@
                 const breakEl = document.createElement('div');
                 breakEl.className = 'break-item flex items-center justify-between bg-gray-800 p-2 rounded-md text-sm';
                 const isShort = br.type === 'short';
-                const borderColor = isShort ? 'border-amber-500' : 'border-gray-700';
+                const isPrayerMola = br.type === 'prayer_mola';
+
+                // Molanın namaz vakti içerip içermediğini kontrol et
+                const breakStartMins = timeToMinutes(br.start);
+                const breakEndMins = timeToMinutes(br.end);
+                const containsPrayerTime = Object.values(defaultPrayerTimes).some(prayerTime => {
+                    const prayerMins = timeToMinutes(prayerTime);
+                    return prayerMins >= breakStartMins && prayerMins < breakEndMins;
+                });
+
+                // Sınır rengini ve "N" göstergesini belirle
+                let borderColor = 'border-gray-700';
+                let indicator = '';
+                if (isShort) {
+                    borderColor = 'border-amber-500';
+                    indicator = '<span class="text-amber-400 font-bold" title="Anlık Mola">A</span>';
+                } else if (isPrayerMola || containsPrayerTime) { // Hem özel namaz molaları hem de namaz içeren planlı molalar için
+                    borderColor = 'border-purple-500';
+                    indicator = '<span class="text-purple-400 font-bold" title="Namaz Vakti İçeriyor">N</span>';
+                }
 
                 breakEl.innerHTML = `
                     <div class="flex-grow flex items-center gap-2">
-                        ${isShort ? '<span class="text-amber-400 font-bold" title="Anlık Mola">A</span>' : ''}
-                        
-                        <!-- Başlangıç Saati Butonları -->
-                        <button data-index="${index}" data-type="start" data-change="-5" class="time-adjust-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded-md">-5</button>
+                        ${indicator}
                         <input type="time" value="${br.start}" data-index="${index}" data-type="start" class="break-time-input bg-gray-900 border ${borderColor} rounded-md px-2 py-1 w-full focus:ring-1 focus:ring-cyan-500 focus:outline-none">
-                        <button data-index="${index}" data-type="start" data-change="+5" class="time-adjust-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded-md">+5</button>
-                        
                         <span class="text-gray-500">-</span>
-                        
-                        <!-- Bitiş Saati Butonları -->
-                        <button data-index="${index}" data-type="end" data-change="-5" class="time-adjust-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded-md">-5</button>
                         <input type="time" value="${br.end}" data-index="${index}" data-type="end" class="break-time-input bg-gray-900 border ${borderColor} rounded-md px-2 py-1 w-full focus:ring-1 focus:ring-cyan-500 focus:outline-none">
-                        <button data-index="${index}" data-type="end" data-change="+5" class="time-adjust-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded-md">+5</button>
                     </div>
                     <div class="flex items-center pl-2">
-                        <!-- Sarı Kare Butonu -->
-                        <button data-index="${index}" class="set-end-to-schedule-end-btn bg-amber-500 hover:bg-amber-600 text-white p-1 rounded-md mr-1" title="Bitiş saatini program sonuna ayarla">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
-                        </button>
                         <button data-index="${index}" title="Molayı sil" class="remove-break-btn text-red-400 hover:text-red-300 p-1 rounded-md">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
@@ -261,8 +279,8 @@
             const endMins = startMins + durationMins;
 
             const newBreak = { 
-                start: minutesToTime(startMins % (24 * 60)),
-                end: minutesToTime(endMins % (24 * 60)),
+                start: minutesToTime(startMins), 
+                end: minutesToTime(endMins),     
                 type: 'short'
             };
             
@@ -275,33 +293,9 @@
 
         const handleBreakListClicks = (e) => {
             const removeBtn = e.target.closest('.remove-break-btn');
-            const timeAdjustBtn = e.target.closest('.time-adjust-btn');
-            const setEndToScheduleEndBtn = e.target.closest('.set-end-to-schedule-end-btn');
-
             if (removeBtn) {
                 const index = removeBtn.dataset.index;
                 breaks.splice(index, 1);
-                renderBreaks();
-            } else if (timeAdjustBtn) {
-                const index = parseInt(timeAdjustBtn.dataset.index, 10);
-                const type = timeAdjustBtn.dataset.type; // 'start' or 'end'
-                const change = parseInt(timeAdjustBtn.dataset.change, 10); // -5 or +5
-
-                let currentMinutes = timeToMinutes(breaks[index][type]);
-                let newMinutes = currentMinutes + change;
-
-                // Saatlerin 24 saatlik döngüde kalmasını sağla
-                if (newMinutes < 0) {
-                    newMinutes += (24 * 60);
-                } else if (newMinutes >= (24 * 60)) {
-                    newMinutes -= (24 * 60);
-                }
-                
-                breaks[index][type] = minutesToTime(newMinutes);
-                renderBreaks();
-            } else if (setEndToScheduleEndBtn) {
-                const index = parseInt(setEndToScheduleEndBtn.dataset.index, 10);
-                breaks[index].end = scheduleEndInput.value; // Programın bitiş saatini ayarla
                 renderBreaks();
             }
         };
@@ -336,15 +330,14 @@
             let output = `Tarih: ${formattedDate}\n`;
             output += `Ad soyad: ${studentName}\nHazırlandığı sınav: ${examName}\n\n`;
             
-            const timePoints = new Set([scheduleStart, scheduleEnd]);
+            const timePoints = new Set([timeToMinutes(scheduleStart), timeToMinutes(scheduleEnd)]);
             breaks.forEach(br => {
-                timePoints.add(br.start);
-                timePoints.add(br.end);
+                timePoints.add(timeToMinutes(br.start));
+                timePoints.add(timeToMinutes(br.end));
             });
             
             const sortedTimePoints = [...timePoints]
-                .filter(t => t && timeToMinutes(t) >= timeToMinutes(scheduleStart) && timeToMinutes(t) <= timeToMinutes(scheduleEnd))
-                .map(timeToMinutes)
+                .filter(t => t >= timeToMinutes(scheduleStart) && t <= timeToMinutes(scheduleEnd))
                 .sort((a, b) => a - b)
                 .map(minutesToTime);
             
@@ -354,6 +347,7 @@
                 const slotStartMins = timeToMinutes(slotStart);
                 const slotEndMins = timeToMinutes(slotEnd);
                 
+                // Slotun orta noktasını kullanarak hangi mola veya aktiviteye denk geldiğini bul
                 const midPoint = slotStartMins + (slotEndMins - slotStartMins) / 2;
                 
                 const currentBreak = breaks.find(br => {
@@ -366,9 +360,12 @@
                 if(currentBreak) {
                     if(currentBreak.type === 'short') {
                         activity = 'Anlık Mola';
-                    } else {
+                    } else if (currentBreak.type === 'prayer_mola') { 
+                        activity = 'Namaz (kalan kısım mola)';
+                    } else { // type === 'planned'
                         const breakStartMins = timeToMinutes(currentBreak.start);
                         const breakEndMins = timeToMinutes(currentBreak.end);
+                        // Planlı mola içinde namaz vakti olup olmadığını kontrol et
                         const isPrayerTimeInBreak = prayerTimesInMinutes.some(
                             prayerMin => prayerMin >= breakStartMins && prayerMin < breakEndMins
                         );
@@ -415,7 +412,7 @@
         };
 
         const showCustomAlert = (message) => {
-            if (document.querySelector('.custom-alert')) return;
+            if (document.querySelector('.custom-alert')) return; // Zaten bir uyarı açıksa yenisini oluşturma
             const alertBox = document.createElement('div');
             alertBox.className = 'custom-alert fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4';
             alertBox.innerHTML = `
@@ -425,6 +422,7 @@
                 </div>
             `;
             document.body.appendChild(alertBox);
+            // Küçük bir gecikme ile animasyonu başlat
             setTimeout(() => {
                 alertBox.querySelector('div').classList.remove('scale-95', 'opacity-0');
             }, 10);
@@ -436,7 +434,7 @@
         // --- Olay Dinleyicilerini Ekle ---
         addBreakBtn.addEventListener('click', handleAddBreak);
         addShortBreakBtn.addEventListener('click', handleAddShortBreak);
-        breaksList.addEventListener('click', handleBreakListClicks); // Bu tek event listener tüm butonları ve inputları dinleyecek
+        breaksList.addEventListener('click', handleBreakListClicks);
         breaksList.addEventListener('change', handleUpdateBreakManually);
         generateBtn.addEventListener('click', handleGenerateSchedule);
         copyBtn.addEventListener('click', handleCopy);
@@ -444,12 +442,5 @@
         // --- Başlangıçta İşle ---
         renderBreaks();
     </script>
-    <style>
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .animate-fade-in-up { animation: fade-in-up 0.3s ease-out forwards; }
-    </style>
 </body>
 </html>
