@@ -86,7 +86,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="schedule-start" class="text-sm text-gray-400">Başlangıç</label>
-                        <input type="time" id="schedule-start" class="mt-1 bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="09:30"> <!-- Burası güncellendi -->
+                        <input type="time" id="schedule-start" class="mt-1 bg-gray-800 border border-gray-600 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="09:30">
                     </div>
                     <div>
                         <label for="schedule-end" class="text-sm text-gray-400">Bitiş</label>
@@ -397,8 +397,13 @@
             // Geçici bir textarea oluşturup metni içine kopyalıyoruz
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = textToCopy;
+            // Metin alanını görünür ancak ekran dışında tut
+            tempTextArea.style.position = 'absolute';
+            tempTextArea.style.left = '-9999px';
+            tempTextArea.style.top = '0';
             document.body.appendChild(tempTextArea);
-            tempTextArea.select();
+            tempTextArea.focus(); // Odakla
+            tempTextArea.select(); // Metni seç
             try {
                 document.execCommand('copy'); // Kopyalama işlemini gerçekleştir
                 copyBtn.textContent = 'Kopyalandı!';
