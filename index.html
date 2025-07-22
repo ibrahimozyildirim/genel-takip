@@ -392,28 +392,49 @@
             outputArea.textContent = output;
         };
 
-        const handleCopy = () => {
+        const handleCopy = async () => {
             const textToCopy = outputArea.textContent;
-            // Geçici bir textarea oluşturup metni içine kopyalıyoruz
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = textToCopy;
-            // Metin alanını görünür ancak ekran dışında tut
-            tempTextArea.style.position = 'absolute';
-            tempTextArea.style.left = '-9999px';
-            tempTextArea.style.top = '0';
-            document.body.appendChild(tempTextArea);
-            tempTextArea.focus(); // Odakla
-            tempTextArea.select(); // Metni seç
+            let copiedSuccessfully = false;
+
             try {
-                document.execCommand('copy'); // Kopyalama işlemini gerçekleştir
-                copyBtn.textContent = 'Kopyalandı!';
+                // Modern Clipboard API'yi dene
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(textToCopy);
+                    copiedSuccessfully = true;
+                }
             } catch (err) {
-                console.error('Metin kopyalanamadı:', err);
-                showCustomAlert('Metin kopyalanırken bir hata oluştu.');
-            } finally {
-                document.body.removeChild(tempTextArea); // Geçici textarea'yı kaldır
-                setTimeout(() => { copyBtn.textContent = 'Kopyala'; }, 2000);
+                // Clipboard API engellenirse veya başarısız olursa, eski yönteme geri dön
+                console.warn('navigator.clipboard.writeText() başarısız oldu, document.execCommand\'e geri dönülüyor:', err);
             }
+
+            // Eğer kopyalama henüz başarılı olmadıysa (API mevcut değilse veya başarısız olduysa), document.execCommand'i dene
+            if (!copiedSuccessfully) {
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = textToCopy;
+                tempTextArea.style.position = 'absolute';
+                tempTextArea.style.left = '-9999px';
+                tempTextArea.style.top = '0';
+                document.body.appendChild(tempTextArea);
+                tempTextArea.focus();
+                tempTextArea.select();
+
+                try {
+                    copiedSuccessfully = document.execCommand('copy');
+                } catch (err) {
+                    console.error('document.execCommand("copy") başarısız oldu:', err);
+                    showCustomAlert('Metin kopyalanırken bir hata oluştu (eski yöntem): ' + err.message);
+                } finally {
+                    document.body.removeChild(tempTextArea);
+                }
+            }
+
+            if (copiedSuccessfully) {
+                copyBtn.textContent = 'Kopyalandı!';
+            } else {
+                showCustomAlert('Metin panoya kopyalanamadı. Lütfen manuel olarak kopyalamayı deneyin.');
+            }
+            
+            setTimeout(() => { copyBtn.textContent = 'Kopyala'; }, 2000);
         };
 
         const showCustomAlert = (message) => {
